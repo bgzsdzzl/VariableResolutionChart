@@ -1,0 +1,25 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.4",
+	"Category": "Data Structures",
+	"Description": "Variable Resolution Chart - dynamic size, per-element type 2D data grid (pure CPU)",
+	"Modules": [
+		{
+			"Name": "VariableResolutionChart",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Version": 0,
+	"VersionName": "",
+	"FriendlyName": "",
+	"CreatedBy": "bgzsdzzl",
+	"CreatedByURL": "https://github.com/bgzsdzzl",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "mailto:bgzsdzzl666@outlook.com",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false
+}

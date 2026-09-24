@@ -1,0 +1,22 @@
+# UE 生成物（不推）
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+
+# VS / IDE
+.vs/
+*.sln
+*.suo
+*.VC.db
+*.opensdf
+*.sdf
+*.pdb
+*.obj
+
+# 系统
+Thumbs.db
+.DS_Store
+
+# 日志
+*.log
