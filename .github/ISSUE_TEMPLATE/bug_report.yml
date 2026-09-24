@@ -1,0 +1,93 @@
+name: Bug Report
+description: Report a reproducible bug in VariableResolutionChart
+title: "[Bug] <Area> - <Short description>"
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Title format
+
+        `[Bug] <Area> - <Short description>`
+
+        Example: `[Bug] Resize - overlap lost when growing along Y axis`
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the plugin does this affect?
+      options:
+        - Grid
+        - Accessors
+        - TypeSystem
+        - Payload
+        - Build
+        - Docs
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: overview
+    attributes:
+      label: Overview
+      description: One or two sentences summarizing the bug.
+      placeholder: Describe the bug in one or two sentences.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: UE version, plugin version/commit, OS, target platform.
+      placeholder: |
+        - Unreal Engine: 5.8.1
+        - Plugin: 1.0.0 / commit abc1234
+        - OS: Windows 11 23H2
+        - Target: Win64 / Development
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Minimal steps that reliably trigger the bug.
+      placeholder: |
+        1. Create a grid with Create(64, 64, Float)
+        2. Call Resize(128, 64, Float)
+        3. Read GetCellType(100, 10)
+    validations:
+      required: true
+
+  - type: textarea
+    id: effect
+    attributes:
+      label: Effect
+      description: What actually happens, and what did you expect instead?
+      placeholder: |
+        Observed: GetCellType returns None for coordinates inside the new region.
+        Expected: GetCellType returns Float.
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Log output, callstacks, workarounds, anything else.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Before submitting
+      options:
+        - label: I have searched existing issues and confirmed this is not a duplicate.
+          required: true
+        - label: I have tested that this issue is reproducible on my setup.
+          required: true
