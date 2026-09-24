@@ -81,6 +81,11 @@ Unreal Engine 5.5 - 5.8 (tested on 5.8.1)
 
 Build dependencies: Core, CoreUObject, Engine
 
+## Documentation
+
+- [API Reference](Docs/API.md)
+- [Design Notes](Docs/Design.md)
+
 License
 Apache License 2.0. See LICENSE and NOTICE.
 
