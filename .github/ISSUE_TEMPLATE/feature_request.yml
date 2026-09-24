@@ -1,0 +1,65 @@
+name: Feature Request
+description: Suggest an idea or improvement for VariableResolutionChart
+title: "[Feature] <Area> - <Short description>"
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Title format
+
+        `[Feature] <Area> - <Short description>`
+
+        Example: `[Feature] TypeSystem - add Vector4 cell type`
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the plugin does this concern?
+      options:
+        - Grid
+        - Accessors
+        - TypeSystem
+        - Payload
+        - Build
+        - Docs
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: overview
+    attributes:
+      label: Overview
+      description: One or two sentences summarizing the request and its motivation.
+      placeholder: I'm building a tile map editor and need to store per-cell ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Concrete API shape, behavior, edge cases, or examples.
+      placeholder: |
+        Add SetVector4 / GetVector4, following the same conventions
+        as the existing typed accessors. Vector4 stored inline in FVRCCell.
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Alternatives, references, or anything else.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Before submitting
+      options:
+        - label: I have searched existing issues and confirmed this is not a duplicate.
+          required: true
