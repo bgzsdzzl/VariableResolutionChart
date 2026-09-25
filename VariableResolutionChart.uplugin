@@ -1,25 +1,26 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.4",
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"FriendlyName": "Variable Resolution Chart",
+	"Description": "Runtime-resizable 2D grid with per-cell type tagging. Pure CPU, no RHI dependency.",
 	"Category": "Data Structures",
-	"Description": "Variable Resolution Chart - dynamic size, per-element type 2D data grid (pure CPU)",
+	"CreatedBy": "bgzsdzzl",
+	"CreatedByURL": "https://github.com/bgzsdzzl",
+	"DocsURL": "https://github.com/bgzsdzzl/VariableResolutionChart/blob/main/README.md",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/bgzsdzzl/VariableResolutionChart/issues",
+	"EngineVersion": "5.5.0",
+	"SupportedTargetPlatforms": [
+		"Win64",
+		"Linux",
+		"Mac"
+	],
 	"Modules": [
 		{
 			"Name": "VariableResolutionChart",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
-	],
-	"Version": 0,
-	"VersionName": "",
-	"FriendlyName": "",
-	"CreatedBy": "bgzsdzzl",
-	"CreatedByURL": "https://github.com/bgzsdzzl",
-	"DocsURL": "",
-	"MarketplaceURL": "",
-	"SupportURL": "mailto:bgzsdzzl666@outlook.com",
-	"CanContainContent": false,
-	"IsBetaVersion": false,
-	"IsExperimentalVersion": false,
-	"Installed": false
+	]
 }
