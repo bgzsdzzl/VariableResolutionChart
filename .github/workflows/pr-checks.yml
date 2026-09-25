@@ -1,0 +1,35 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  pr-checks:
+    name: PR Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for build artifacts
+        run: |
+          FOUND=$(find . -type d \( -name Binaries -o -name Intermediate -o -name Saved \) 2>/dev/null | head -n 5)
+          if [ -n "$FOUND" ]; then
+            echo "::error::检测到编译产物，不允许提交："
+            echo "$FOUND"
+            exit 1
+          fi
+          echo "OK: 没有编译产物"
+
+      - name: Check PR description mentions tests
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if ! echo "$PR_BODY" | grep -qiE "RunTests|测试|Automation"; then
+            echo "::error::PR 描述中没有测试说明。请在模板中填写测试步骤。"
+            exit 1
+          fi
+          echo "OK: PR 描述包含测试说明"
