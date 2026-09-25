@@ -139,6 +139,11 @@ private:
     /** Out-of-line storage for String / Bytes cells, keyed by linear index. */
     UPROPERTY() TMap<int32, FVRCPayload> ExternalPayload;
 
+    #if WITH_DEV_AUTOMATION_TESTS
+    /** Test-only accessor. Lets automation tests assert no orphan payload entries. */
+    const TMap<int32, FVRCPayload>& GetExternalPayloadForTesting() const { return ExternalPayload; }
+    #endif
+
     FORCEINLINE int32 ToIndex(int32 X, int32 Y) const { return Y * Width + X; }
 
     /** Overwrite a cell with a fresh default of the given type; drop payload. */

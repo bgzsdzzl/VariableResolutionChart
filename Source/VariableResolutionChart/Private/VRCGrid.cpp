@@ -1,5 +1,4 @@
 #include "VRCGrid.h"
-#include "VRCGrid.h"
 #include "VRCTypes.h"
 #include "Serialization/Archive.h"
 #include "Serialization/MemoryReader.h"
