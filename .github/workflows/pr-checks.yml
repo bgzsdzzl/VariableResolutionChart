@@ -22,7 +22,8 @@ jobs:
             exit 1
           fi
           echo "OK: No compiled output"
-
+      - name: Check C++ syntax
+        run: python3 Scripts/check_syntax.py Source
       - name: Check PR description mentions tests
         if: github.event_name == 'pull_request'
         env:
