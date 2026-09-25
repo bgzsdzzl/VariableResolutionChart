@@ -38,6 +38,27 @@ struct VARIABLERESOLUTIONCHART_API FVRCCell
     UPROPERTY(BlueprintReadWrite, Category = "VRC") FLinearColor ColorValue = FLinearColor::Black;
 };
 
+FORCEINLINE FArchive& operator<<(FArchive& Ar, FVRCCell& Cell)
+{
+    // Serialize the enum as uint8 to keep the wire format stable across
+    // platforms and independent of UENUM reflection.
+    uint8 TypeByte = static_cast<uint8>(Cell.Type);
+    Ar << TypeByte;
+    if (Ar.IsLoading())
+    {
+        Cell.Type = static_cast<EVRCCellType>(TypeByte);
+    }
+
+    Ar << Cell.FloatValue;
+    Ar << Cell.IntValue;
+    Ar << Cell.BoolValue;
+    Ar << Cell.Vector2Value;
+    Ar << Cell.Vector3Value;
+    Ar << Cell.ColorValue;
+
+    return Ar;
+}
+
 /** Out-of-line storage for String / Bytes cells. */
 USTRUCT()
 struct VARIABLERESOLUTIONCHART_API FVRCPayload
@@ -47,3 +68,10 @@ struct VARIABLERESOLUTIONCHART_API FVRCPayload
     UPROPERTY() FString        StringValue;
     UPROPERTY() TArray<uint8>  ByteValue;
 };
+
+FORCEINLINE FArchive& operator<<(FArchive& Ar, FVRCPayload& Payload)
+{
+    Ar << Payload.StringValue;
+    Ar << Payload.ByteValue;
+    return Ar;
+}

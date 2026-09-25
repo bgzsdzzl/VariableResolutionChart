@@ -448,3 +448,56 @@ those are kept in a separate sparse map. Use `GetString` / `GetBytes` for
 
 those types.
 
+---
+
+## Serialization
+
+The serialized stream carries a version number, incremented whenever the
+layout changes. Both the inline cell array and `ExternalPayload` are written,
+so a grid round-trips completely even when it uses `String` or `Bytes`.
+This is the main difference from `GetRawCells()`, which exposes only the
+inline array.
+
+### `virtual void Serialize(FArchive& Ar) override`
+
+Overrides `UObject::Serialize`. Any path that already goes through the
+archive system — `SaveGame`, disk persistence, replicated properties — picks
+this up automatically with no extra wiring.
+
+Writes, in order:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| Version | `int32` | Format version. Currently `1`. |
+| Width | `int32` | Grid width. |
+| Height | `int32` | Grid height. |
+| CellCount | `int32` | Must equal `Width * Height`. |
+| Cells | `FVRCCell[]` | Serialized field by field, not as raw bytes. |
+| PayloadCount | `int32` | Number of `ExternalPayload` entries. |
+| Payloads | `{int32, FVRCPayload}[]` | Linear index → payload. |
+
+The enum is written as `uint8` rather than through `UENUM` reflection, so the
+wire format is stable across platforms and unaffected by reflection metadata.
+Fields are written individually instead of as a `memcpy` of the struct, so
+changing the layout of `FVRCCell` does not silently invalidate old data.
+
+Loading a stream written by a newer build fails rather than guessing. The
+same applies to a stream whose `CellCount` does not match `Width * Height`,
+or whose payload count exceeds the cell count — these checks exist so a
+corrupted stream cannot drive a large allocation.
+
+### `TArray<uint8> SerializeToBytes() const`
+
+Packs the grid into a byte array using an in-memory archive. Use this when
+the destination is not an `FArchive` — network transport, a custom container,
+or a file written by hand.
+
+### `bool DeserializeFromBytes(const TArray<uint8>& InBytes)`
+
+Restores the grid from a byte array produced by `SerializeToBytes()`. Returns
+`true` on success and `false` on any failure.
+
+Deserialization is transactional: the incoming data is read into temporaries
+and only committed if the whole stream parses. On failure the grid is left
+exactly as it was, so a bad buffer cannot partially overwrite good state.
+

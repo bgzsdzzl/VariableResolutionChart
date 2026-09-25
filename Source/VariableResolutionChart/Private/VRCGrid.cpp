@@ -1,4 +1,9 @@
 #include "VRCGrid.h"
+#include "VRCGrid.h"
+#include "VRCTypes.h"
+#include "Serialization/Archive.h"
+#include "Serialization/MemoryReader.h"
+#include "Serialization/MemoryWriter.h"
 
 // ---------------------------------------------------------------------------
 // Construction
@@ -274,4 +279,166 @@ bool UVRCGrid::SetCellType(int32 X, int32 Y, EVRCCellType NewType)
 EVRCCellType UVRCGrid::GetCellType(int32 X, int32 Y) const
 {
     return IsValidCoordinate(X, Y) ? Cells[ToIndex(X, Y)].Type : EVRCCellType::None;
+}
+
+// ---------------------------------------------------------------------------
+// Serialization
+// ---------------------------------------------------------------------------
+
+namespace
+{
+    // Bump this whenever the serialized layout changes.
+    constexpr int32 GVRCGridSerializationVersion = 1;
+
+    FORCEINLINE FArchive& SerializeCell(FArchive& Ar, FVRCCell& Cell)
+    {
+        // Serialize the enum as uint8 to keep the wire format stable across
+        // platforms and independent of UENUM reflection.
+        uint8 TypeByte = static_cast<uint8>(Cell.Type);
+        Ar << TypeByte;
+        if (Ar.IsLoading())
+        {
+            Cell.Type = static_cast<EVRCCellType>(TypeByte);
+        }
+
+        Ar << Cell.FloatValue;
+        Ar << Cell.IntValue;
+        Ar << Cell.BoolValue;
+        Ar << Cell.Vector2Value;
+        Ar << Cell.Vector3Value;
+        Ar << Cell.ColorValue;
+
+        return Ar;
+    }
+
+    FORCEINLINE FArchive& SerializePayload(FArchive& Ar, FVRCPayload& Payload)
+    {
+        Ar << Payload.StringValue;
+        Ar << Payload.ByteValue;
+        return Ar;
+    }
+
+    void SerializeGridData(
+        FArchive& Ar,
+        int32& InOutWidth,
+        int32& InOutHeight,
+        TArray<FVRCCell>& InOutCells,
+        TMap<int32, FVRCPayload>& InOutPayload)
+    {
+        int32 Version = GVRCGridSerializationVersion;
+        Ar << Version;
+
+        if (Ar.IsLoading() && Version > GVRCGridSerializationVersion)
+        {
+            // Data was written by a newer build; refuse rather than guess.
+            UE_LOG(LogTemp, Warning,
+                TEXT("VRCGrid: stream version %d is newer than supported version %d"),
+                Version, GVRCGridSerializationVersion);
+            Ar.SetError();
+            return;
+        }
+
+        Ar << InOutWidth;
+        Ar << InOutHeight;
+
+        // --- Inline cells ---
+        int32 CellCount = Ar.IsLoading() ? 0 : InOutCells.Num();
+        Ar << CellCount;
+
+        if (Ar.IsLoading())
+        {
+            // Reject inconsistent sizes so a corrupted stream cannot blow up memory.
+            if (CellCount < 0
+                || InOutWidth < 0 || InOutHeight < 0
+                || CellCount != InOutWidth * InOutHeight)
+            {
+                Ar.SetError();
+                return;
+            }
+            InOutCells.SetNum(CellCount);
+        }
+
+        for (FVRCCell& Cell : InOutCells)
+        {
+            SerializeCell(Ar, Cell);
+        }
+
+        // --- External payload ---
+        int32 PayloadCount = Ar.IsLoading() ? 0 : InOutPayload.Num();
+        Ar << PayloadCount;
+
+        if (Ar.IsLoading())
+        {
+            if (PayloadCount < 0 || PayloadCount > InOutCells.Num())
+            {
+                Ar.SetError();
+                return;
+            }
+            InOutPayload.Empty(PayloadCount);
+
+            for (int32 Index = 0; Index < PayloadCount; ++Index)
+            {
+                int32 Key = 0;
+                Ar << Key;
+
+                FVRCPayload Entry;
+                SerializePayload(Ar, Entry);
+                InOutPayload.Add(Key, MoveTemp(Entry));
+            }
+        }
+        else
+        {
+            for (TPair<int32, FVRCPayload>& Pair : InOutPayload)
+            {
+                Ar << Pair.Key;
+                SerializePayload(Ar, Pair.Value);
+            }
+        }
+    }
+} // namespace
+
+void UVRCGrid::Serialize(FArchive& Ar)
+{
+    Super::Serialize(Ar);
+    SerializeGridData(Ar, Width, Height, Cells, ExternalPayload);
+}
+
+TArray<uint8> UVRCGrid::SerializeToBytes() const
+{
+    TArray<uint8> OutBytes;
+    FMemoryWriter Writer(OutBytes, /*bIsPersistent=*/ true);
+
+    // Serialize is non-const, but the save path never mutates state.
+    const_cast<UVRCGrid*>(this)->Serialize(Writer);
+
+    return OutBytes;
+}
+
+bool UVRCGrid::DeserializeFromBytes(const TArray<uint8>& InBytes)
+{
+    if (InBytes.Num() == 0)
+    {
+        return false;
+    }
+
+    // Read into temporaries first; only commit on success.
+    int32 TmpWidth = 0;
+    int32 TmpHeight = 0;
+    TArray<FVRCCell> TmpCells;
+    TMap<int32, FVRCPayload> TmpPayload;
+
+    FMemoryReader Reader(InBytes, /*bIsPersistent=*/ true);
+    SerializeGridData(Reader, TmpWidth, TmpHeight, TmpCells, TmpPayload);
+
+    if (Reader.IsError())
+    {
+        return false;
+    }
+
+    Width = TmpWidth;
+    Height = TmpHeight;
+    Cells = MoveTemp(TmpCells);
+    ExternalPayload = MoveTemp(TmpPayload);
+
+    return true;
 }
