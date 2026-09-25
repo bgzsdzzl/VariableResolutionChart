@@ -116,6 +116,21 @@ public:
 
     const TArray<FVRCCell>& GetRawCells() const { return Cells; }
 
+    // =====================================================================
+    // Serialization
+    // =====================================================================
+
+    /** Uses the UE archive system; SaveGame and disk persistence pick this up automatically. */
+    virtual void Serialize(FArchive& Ar) override;
+
+    /** Packs the full grid into a byte array for custom storage or network transport. */
+    UFUNCTION(BlueprintCallable, Category = "VRC|Serialization")
+    TArray<uint8> SerializeToBytes() const;
+
+    /** Restores the grid from a byte array. On failure the current grid is left untouched. */
+    UFUNCTION(BlueprintCallable, Category = "VRC|Serialization")
+    bool DeserializeFromBytes(const TArray<uint8>& InBytes);
+
 private:
     UPROPERTY() int32 Width = 0;
     UPROPERTY() int32 Height = 0;
