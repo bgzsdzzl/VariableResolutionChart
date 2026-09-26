@@ -1,0 +1,13 @@
+# Release manifest for VariableResolutionChart.
+# One entry per line, relative to the repository root.
+# Directories are packed recursively.
+# Lines starting with '#' and blank lines are ignored.
+
+Source
+Docs
+Config
+VariableResolutionChart.uplugin
+README.md
+LICENSE
+NOTICE
+CONTRIBUTING.md
